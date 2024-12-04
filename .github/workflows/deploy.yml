@@ -1,0 +1,37 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Transfer files to EC2 instance
+      - name: Copy Files to EC2
+        uses: appleboy/scp-action@v0.1.9
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./*"
+          target: "~/streamlit-app/"
+
+      # SSH into EC2 and set up the environment
+      - name: SSH into EC2 and Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/streamlit-app
+            pip3 install -r requirements.txt
+            nohup streamlit run app.py --server.port=8501 --server.address=0.0.0.0 &
