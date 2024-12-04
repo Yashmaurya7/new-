@@ -9,6 +9,7 @@ num2 = st.number_input("Enter the second number:", step=1.0)
 
 
 
+
 # Button to calculate the sum
 if st.button("Calculate Sum"):
     result = num1 + num2
