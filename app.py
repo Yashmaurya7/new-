@@ -7,7 +7,6 @@ num1 = st.number_input("Enter the first number:", step=1.0)
 num2 = st.number_input("Enter the second number:", step=1.0)
 
 
-
 if st.button("Calculate Sum"):
     result = num1 + num2
     st.success(f"The sum of {num1} and {num2} is {result}")
