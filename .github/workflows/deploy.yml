@@ -3,35 +3,37 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow when changes are pushed to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout Code
+      # Step 1: Check out the repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Transfer files to EC2 instance
+      # Step 2: Copy files to EC2 using SCP
       - name: Copy Files to EC2
-        uses: appleboy/scp-action@v0.1.9
+        uses: appleboy/scp-action@master  # Use the latest version
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "./*"
-          target: "~/streamlit-app/"
+          source: "./*"  # All files in the repository
+          target: "~/streamlit-app/"  # Target directory on EC2
 
-      # SSH into EC2 and set up the environment
+      # Step 3: SSH into EC2 and deploy the app
       - name: SSH into EC2 and Deploy
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@master  # Use the latest version
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/streamlit-app
-            pip3 install -r requirements.txt
+            python3 -m venv env
+            source env/bin/activate
+            pip install -r requirements.txt
             nohup streamlit run app.py --server.port=8501 --server.address=0.0.0.0 &
